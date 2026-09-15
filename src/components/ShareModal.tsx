@@ -44,13 +44,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, profile
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-3xl bg-neutral-900/95 border border-white/15 p-6 sm:p-7 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg rounded-3xl bg-white/95 border border-slate-200/90 p-6 sm:p-7 shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto">
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           title="Close Modal"
         >
           <X className="w-5 h-5" />
@@ -58,7 +58,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, profile
 
         {/* Header with 24/7 Online Status Badge */}
         <div className="text-center space-y-2 mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold mb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-1">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -66,50 +66,50 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, profile
             <span>24/7 Public Cloud Link</span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-extrabold font-display">Share {profileName}'s Hub</h2>
-          <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+          <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-900">Share {profileName}'s Hub</h2>
+          <p className="text-xs text-slate-600 max-w-sm mx-auto">
             Give this permanent public link to users so they can access your website 24/7 without waiting.
           </p>
         </div>
 
         {/* Critical Explanation Notice: Why other users saw "Loading website" */}
-        <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-left space-y-1.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+        <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left space-y-1.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
             <span>Why users saw "Loading website" previously:</span>
           </div>
-          <p className="text-[11px] text-amber-200/90 leading-relaxed">
-            You shared the private <strong>Development URL (<code className="bg-black/30 px-1 py-0.5 rounded text-amber-300">ais-dev-...</code>)</strong> from your browser bar. Dev links sleep when your AI Studio tab is closed!
+          <p className="text-[11px] text-amber-950 leading-relaxed">
+            You shared the private <strong>Development URL (<code className="bg-amber-100 px-1 py-0.5 rounded text-amber-900">ais-dev-...</code>)</strong> from your browser bar. Dev links sleep when your AI Studio tab is closed!
           </p>
-          <p className="text-[11px] text-neutral-300 leading-relaxed pt-0.5">
-            <strong>To fix this permanently:</strong> Click the <strong className="text-white">"Share"</strong> button at the top-right of AI Studio to publish. Then share the permanent public URL below!
+          <p className="text-[11px] text-slate-700 leading-relaxed pt-0.5">
+            <strong>To fix this permanently:</strong> Click the <strong className="text-slate-900">"Share"</strong> button at the top-right of AI Studio to publish. Then share the permanent public URL below!
           </p>
         </div>
 
         {/* Permanent 24/7 Live URL Section */}
         <div className="space-y-1.5 mb-4">
-          <div className="flex items-center justify-between text-xs px-1 text-neutral-400">
-            <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <div className="flex items-center justify-between text-xs px-1 text-slate-600">
+            <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
               <Globe className="w-3.5 h-3.5" />
               Permanent 24/7 Public URL
             </span>
-            <span className="text-[11px] text-neutral-400">Google Cloud Run</span>
+            <span className="text-[11px] text-slate-500">Google Cloud Run</span>
           </div>
 
-          <div className="flex items-center gap-2 p-2 bg-black/60 border border-white/10 rounded-xl">
+          <div className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
             <input
               type="text"
               readOnly
               value={publicShareUrl}
-              className="flex-1 bg-transparent px-2 text-xs text-neutral-200 font-mono focus:outline-none truncate select-all"
+              className="flex-1 bg-transparent px-2 text-xs text-slate-800 font-mono focus:outline-none truncate select-all"
             />
             <button
               type="button"
               id="copy-share-url-btn"
               onClick={() => handleCopy(publicShareUrl)}
-              className="px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-neutral-200 transition-colors flex items-center gap-1 shrink-0 active:scale-95"
+              className="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors flex items-center gap-1 shrink-0 active:scale-95 shadow-xs"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied' : 'Copy Link'}</span>
             </button>
           </div>
@@ -117,7 +117,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, profile
 
         {/* QR Code */}
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-white rounded-2xl shadow-xl flex items-center justify-center">
+          <div className="p-3 bg-white rounded-2xl border border-slate-200 shadow-md flex items-center justify-center">
             <svg
               className="w-32 h-32 sm:w-36 sm:h-36"
               viewBox="0 0 100 100"
@@ -164,9 +164,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, profile
         <button
           type="button"
           onClick={handleNativeShare}
-          className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-98"
+          className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-98"
         >
-          <Share2 className="w-4 h-4 text-black" />
+          <Share2 className="w-4 h-4 text-white" />
           <span>Copy & Share 24/7 Link</span>
         </button>
       </div>

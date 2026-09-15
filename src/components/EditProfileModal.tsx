@@ -171,15 +171,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <div className="flex items-center gap-2.5 mb-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, avatarUrl: '/avatar.jpg' })}
+                    onClick={() => setFormData({ ...formData, avatarUrl: '/avatar.png?v=virat18' })}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
-                      formData.avatarUrl === '/avatar.jpg'
+                      formData.avatarUrl.includes('avatar')
                         ? 'border-white bg-white/20 text-white shadow-sm'
                         : 'border-white/10 bg-white/5 text-neutral-400 hover:text-white'
                     }`}
                   >
-                    <img src="/avatar.jpg" alt="Profile" className="w-5 h-5 rounded-full object-cover" />
-                    <span>Cricket Photo</span>
+                    <img src="/avatar.png?v=virat18" alt="Profile" className="w-5 h-5 rounded-full object-cover" />
+                    <span>Cricket Photo (Virat 18)</span>
                   </button>
                   <button
                     type="button"

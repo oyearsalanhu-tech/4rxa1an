@@ -1,4 +1,4 @@
-export type ThemeMode = 'dark' | 'light' | 'midnight' | 'emerald';
+export type ThemeMode = 'blue' | 'green' | 'pink';
 
 export interface SocialPlatform {
   id: string;
