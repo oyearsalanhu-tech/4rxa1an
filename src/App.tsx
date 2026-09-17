@@ -7,17 +7,18 @@ import { ContactSection } from './components/ContactSection';
 import { ShareModal } from './components/ShareModal';
 import { MusicPlayerPopup } from './components/MusicPlayerPopup';
 import { Toast } from './components/Toast';
+import { VisitorBadge } from './components/VisitorBadge';
 import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon } from './components/SocialIcons';
 import { Sparkles, ArrowUpRight, Compass } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('arsalan_hub_profile_v4');
+    const saved = localStorage.getItem('arsalan_hub_profile_v5');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (!parsed.avatarUrl || parsed.avatarUrl === '/avatar.jpg') {
-          parsed.avatarUrl = '/avatar.png?v=virat18';
+        if (!parsed.avatarUrl || parsed.avatarUrl.includes('v4') || parsed.avatarUrl === '/avatar.jpg') {
+          parsed.avatarUrl = '/avatar.png?v=virat18_celebration';
         }
         return parsed;
       } catch {
@@ -60,7 +61,7 @@ export default function App() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   useEffect(() => {
-    localStorage.setItem('arsalan_hub_profile_v4', JSON.stringify(profile));
+    localStorage.setItem('arsalan_hub_profile_v5', JSON.stringify(profile));
   }, [profile]);
 
   useEffect(() => {
@@ -100,12 +101,12 @@ export default function App() {
   const getThemeClasses = () => {
     switch (theme) {
       case 'green':
-        return 'bg-[#f4faf6] text-slate-800 selection:bg-emerald-600 selection:text-white';
+        return 'bg-[#06140d] text-slate-100 selection:bg-emerald-500 selection:text-white';
       case 'pink':
-        return 'bg-[#fdf4f7] text-slate-800 selection:bg-pink-600 selection:text-white';
+        return 'bg-[#140813] text-slate-100 selection:bg-pink-500 selection:text-white';
       case 'blue':
       default:
-        return 'bg-[#f4f7fc] text-slate-800 selection:bg-blue-600 selection:text-white';
+        return 'bg-[#090e1a] text-slate-100 selection:bg-blue-500 selection:text-white';
     }
   };
 
@@ -127,21 +128,21 @@ export default function App() {
 
   return (
     <div className={`min-h-screen w-full max-w-full overflow-x-hidden relative font-sans transition-colors duration-500 ${getThemeClasses()}`}>
-      {/* Background with delicate light aesthetic atmospheric texture and tint */}
+      {/* Background with delicate aesthetic atmospheric texture and dark theme tint */}
       <div className="fixed inset-0 w-full h-full min-h-screen pointer-events-none -z-20 overflow-hidden">
         <div
           className={`absolute inset-0 transition-colors duration-700 ${
             theme === 'green'
-              ? 'bg-gradient-to-b from-[#e8f7ee]/90 via-[#f4faf6]/95 to-[#f4faf6]'
+              ? 'bg-gradient-to-b from-[#081e14]/95 via-[#06140d]/95 to-[#040e09]'
               : theme === 'pink'
-              ? 'bg-gradient-to-b from-[#fcebf3]/90 via-[#fdf4f7]/95 to-[#fdf4f7]'
-              : 'bg-gradient-to-b from-[#e9f2fd]/90 via-[#f4f7fc]/95 to-[#f4f7fc]'
+              ? 'bg-gradient-to-b from-[#220d22]/95 via-[#140813]/95 to-[#0d040c]'
+              : 'bg-gradient-to-b from-[#0b1429]/95 via-[#090e1a]/95 to-[#050811]'
           }`}
         />
         <img
           src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop"
           alt="Atmospheric Background"
-          className="w-full h-full object-cover object-center opacity-10 mix-blend-multiply scale-105 filter blur-[2px]"
+          className="w-full h-full object-cover object-center opacity-15 mix-blend-screen scale-105 filter blur-[2px]"
         />
       </div>
 
@@ -150,28 +151,28 @@ export default function App() {
         <div
           className={`absolute -top-32 left-1/2 -translate-x-1/2 w-full max-w-[700px] h-[350px] rounded-full blur-3xl transition-colors duration-700 ${
             theme === 'green'
-              ? 'bg-emerald-300/25'
+              ? 'bg-emerald-500/20'
               : theme === 'pink'
-              ? 'bg-pink-300/25'
-              : 'bg-blue-300/25'
+              ? 'bg-pink-500/20'
+              : 'bg-blue-500/20'
           }`}
         />
         <div
           className={`absolute top-1/4 left-0 w-72 h-72 rounded-full blur-3xl transition-colors duration-700 ${
             theme === 'green'
-              ? 'bg-teal-300/20'
+              ? 'bg-teal-500/15'
               : theme === 'pink'
-              ? 'bg-rose-300/20'
-              : 'bg-indigo-300/20'
+              ? 'bg-rose-500/15'
+              : 'bg-indigo-500/15'
           }`}
         />
         <div
           className={`absolute top-2/3 right-0 w-72 h-72 rounded-full blur-3xl transition-colors duration-700 ${
             theme === 'green'
-              ? 'bg-lime-300/20'
+              ? 'bg-emerald-600/15'
               : theme === 'pink'
-              ? 'bg-fuchsia-300/20'
-              : 'bg-cyan-300/20'
+              ? 'bg-fuchsia-600/15'
+              : 'bg-sky-600/15'
           }`}
         />
       </div>
@@ -192,11 +193,11 @@ export default function App() {
         {/* Quick-Access Flagship Channels (Instagram, YouTube, TikTok, Threads, Discord) */}
         <div className="mt-4 mb-8">
           <div className="flex items-center justify-between mb-3 px-1">
-            <span className="text-xs uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               Primary Creator Channels
             </span>
-            <span className="text-xs text-slate-500">Tap to visit directly</span>
+            <span className="text-xs text-slate-400">Tap to visit directly</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3">
@@ -208,20 +209,20 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipInstagram)}
-                className="group p-3 sm:p-4 rounded-2xl bg-white/85 hover:bg-white border border-slate-200/80 hover:border-pink-300 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md hover:shadow-pink-500/10 active:scale-95"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-pink-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-pink-500/15 active:scale-95 backdrop-blur-md"
               >
-                <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <InstagramIcon className="w-5 h-5 text-pink-600" />
+                <div className="w-10 h-10 rounded-xl bg-pink-950/70 border border-pink-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <InstagramIcon className="w-5 h-5 text-pink-400" />
                 </div>
                 <div>
-                  <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-pink-600 transition-colors">
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-pink-400 transition-colors">
                     Instagram
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono hidden sm:block truncate max-w-[100px]">
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
                     {flagshipInstagram.handle}
                   </span>
                 </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-pink-600 font-semibold group-hover:underline">
+                <div className="flex items-center gap-0.5 text-[11px] text-pink-400 font-semibold group-hover:underline">
                   <span>Visit</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -236,20 +237,20 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipYouTube)}
-                className="group p-3 sm:p-4 rounded-2xl bg-white/85 hover:bg-white border border-slate-200/80 hover:border-red-300 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md hover:shadow-red-500/10 active:scale-95"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-red-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-red-500/15 active:scale-95 backdrop-blur-md"
               >
-                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <YouTubeIcon className="w-5 h-5 text-red-600" />
+                <div className="w-10 h-10 rounded-xl bg-red-950/70 border border-red-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <YouTubeIcon className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-red-600 transition-colors">
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-red-400 transition-colors">
                     YouTube
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono hidden sm:block truncate max-w-[100px]">
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
                     {flagshipYouTube.handle}
                   </span>
                 </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-red-600 font-semibold group-hover:underline">
+                <div className="flex items-center gap-0.5 text-[11px] text-red-400 font-semibold group-hover:underline">
                   <span>Visit</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -264,20 +265,20 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipTikTok)}
-                className="group p-3 sm:p-4 rounded-2xl bg-white/85 hover:bg-white border border-slate-200/80 hover:border-cyan-300 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md hover:shadow-cyan-500/10 active:scale-95"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-cyan-500/15 active:scale-95 backdrop-blur-md"
               >
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <TikTokIcon className="w-5 h-5 text-cyan-600" />
+                <div className="w-10 h-10 rounded-xl bg-cyan-950/70 border border-cyan-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <TikTokIcon className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-cyan-600 transition-colors">
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">
                     TikTok
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono hidden sm:block truncate max-w-[100px]">
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
                     {flagshipTikTok.handle}
                   </span>
                 </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-cyan-600 font-semibold group-hover:underline">
+                <div className="flex items-center gap-0.5 text-[11px] text-cyan-400 font-semibold group-hover:underline">
                   <span>Visit</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -292,20 +293,20 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipThreads)}
-                className="group p-3 sm:p-4 rounded-2xl bg-white/85 hover:bg-white border border-slate-200/80 hover:border-slate-400 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md active:scale-95"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-600 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-white/5 active:scale-95 backdrop-blur-md"
               >
-                <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <ThreadsIcon className="w-5 h-5 text-slate-900" />
+                <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <ThreadsIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700 transition-colors">
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-slate-300 transition-colors">
                     Threads
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono hidden sm:block truncate max-w-[100px]">
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
                     {flagshipThreads.handle}
                   </span>
                 </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-slate-700 font-semibold group-hover:underline">
+                <div className="flex items-center gap-0.5 text-[11px] text-slate-300 font-semibold group-hover:underline">
                   <span>Visit</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -320,20 +321,20 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipDiscord)}
-                className="group p-3 sm:p-4 rounded-2xl bg-white/85 hover:bg-white border border-slate-200/80 hover:border-indigo-300 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md hover:shadow-indigo-500/10 active:scale-95 col-span-2 sm:col-span-1"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-indigo-500/15 active:scale-95 col-span-2 sm:col-span-1 backdrop-blur-md"
               >
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <DiscordIcon className="w-5 h-5 text-[#5865F2]" />
+                <div className="w-10 h-10 rounded-xl bg-indigo-950/70 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <DiscordIcon className="w-5 h-5 text-[#7289da]" />
                 </div>
                 <div>
-                  <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#5865F2] transition-colors">
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-[#7289da] transition-colors">
                     Discord
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono hidden sm:block truncate max-w-[100px]">
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
                     Server
                   </span>
                 </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-[#5865F2] font-semibold group-hover:underline">
+                <div className="flex items-center gap-0.5 text-[11px] text-[#7289da] font-semibold group-hover:underline">
                   <span>Join Server</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -352,9 +353,9 @@ export default function App() {
               { id: 'community', label: 'Community (Discord & Threads)' },
             ].map((cat) => {
               const isActive = filterCategory === cat.id;
-              let activeColorClass = 'bg-blue-600 text-white shadow-xs';
-              if (theme === 'green') activeColorClass = 'bg-emerald-600 text-white shadow-xs';
-              if (theme === 'pink') activeColorClass = 'bg-pink-600 text-white shadow-xs';
+              let activeColorClass = 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-1 ring-blue-400';
+              if (theme === 'green') activeColorClass = 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-1 ring-emerald-400';
+              if (theme === 'pink') activeColorClass = 'bg-pink-600 text-white shadow-md shadow-pink-500/30 ring-1 ring-pink-400';
 
               return (
                 <button
@@ -364,7 +365,7 @@ export default function App() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                     isActive
                       ? activeColorClass
-                      : 'bg-white/70 hover:bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80'
+                      : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800'
                   }`}
                 >
                   {cat.label}
@@ -373,7 +374,7 @@ export default function App() {
             })}
           </div>
 
-          <span className="text-xs text-slate-500 font-medium whitespace-nowrap hidden sm:inline">
+          <span className="text-xs text-slate-400 font-medium whitespace-nowrap hidden sm:inline">
             {filteredPlatforms.length} {filteredPlatforms.length === 1 ? 'Platform' : 'Platforms'}
           </span>
         </div>
@@ -384,6 +385,7 @@ export default function App() {
             <PlatformCard
               key={platform.id}
               platform={platform}
+              theme={theme}
               onVisit={handleVisitPlatform}
               onCopy={handleCopy}
             />
@@ -391,18 +393,22 @@ export default function App() {
         </main>
 
         {/* Direct Contact & Collaboration Section */}
-        <ContactSection email={profile.email} onCopy={handleCopy} />
+        <ContactSection email={profile.email} theme={theme} onCopy={handleCopy} />
 
         {/* Aesthetic Footer */}
-        <footer className="mt-14 text-center text-xs text-slate-500 space-y-3 flex flex-col items-center">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 shadow-xs bg-white">
+        <footer className="mt-14 text-center text-xs text-slate-400 space-y-3.5 flex flex-col items-center">
+          <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-700 shadow-xs bg-slate-900">
             <img src="/logo.png?v=death_express" alt="Death Express Logo" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
           </div>
+
+          {/* Real-time Aesthetic Visitor Count & Social Credibility Badge */}
+          <VisitorBadge theme={theme} />
+
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsShareOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold hover:bg-emerald-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 text-[11px] font-semibold hover:bg-emerald-900/70 transition-colors"
               title="View 24/7 Live Status & Cloud Hosting"
             >
               <span className="relative flex h-1.5 w-1.5">
@@ -412,7 +418,7 @@ export default function App() {
               <span>24/7 Online • Google Cloud Run</span>
             </button>
           </div>
-          <p className="font-medium text-slate-700">
+          <p className="font-medium text-slate-300">
             {profile.name} © {new Date().getFullYear()} • Official Social Hub
           </p>
           <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1">
