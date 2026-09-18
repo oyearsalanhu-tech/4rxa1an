@@ -14,9 +14,10 @@ import {
   ExternalLink,
   Plus,
   Minus,
-  Radio,
   Disc3,
-  Repeat
+  Repeat,
+  Heart,
+  FileText
 } from 'lucide-react';
 import { InstagramIcon } from './SocialIcons';
 
@@ -36,23 +37,21 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
   const [volume, setVolume] = useState<number>(80);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(195); // Default 3:15, updated dynamically from player
   const [isLooping, setIsLooping] = useState<boolean>(true);
   const [showLyrics, setShowLyrics] = useState<boolean>(true);
-  const [videoMode, setVideoMode] = useState<'lyrics' | 'official'>('lyrics');
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
 
-  const DURATION_LIMIT = 120; // Requested duration: 120 seconds (2:00)
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const progressTimerRef = useRef<number | null>(null);
 
-  // Start offset where the lyrics "us ki ankho me phaila kajal" start:
-  // - Lyrics Audio (1H8IW7Wt3g8): Begins right at 0s with the vocals
-  // - Official Video (nwXAkF8OFCc): Begins after the cinematic intro at exactly 19s
-  const currentVideoId = videoMode === 'lyrics' ? '1H8IW7Wt3g8' : 'nwXAkF8OFCc';
-  const startOffset = videoMode === 'lyrics' ? 0 : 19;
-  const endOffset = startOffset + DURATION_LIMIT;
+  // Skip the first 10 seconds (crowd / celebration voice intro) so music starts cleanly
+  const START_OFFSET = 10;
 
-  // Post message command helper to control YouTube iframe
+  // Kashish Official Music Video by Ashish Bhatia, Omkar Singh, Kashish Ratnani
+  const currentVideoId = 'nwXAkF8OFCc';
+
+  // PostMessage command helper to control YouTube iframe
   const sendYouTubeCommand = (func: string, args: (string | number | boolean)[] = []) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
@@ -66,10 +65,13 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
     }
   };
 
-  // Start or resume music
+  // Start or resume music (always starts at 10s or resumes)
   const handlePlay = () => {
     setIsPlaying(true);
     setHasInteracted(true);
+    if (currentTime === 0) {
+      sendYouTubeCommand('seekTo', [START_OFFSET, true]);
+    }
     sendYouTubeCommand('playVideo');
     sendYouTubeCommand('setVolume', [isMuted ? 0 : volume]);
   };
@@ -89,10 +91,10 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
     }
   };
 
-  // Restart 120-second snippet from "us ki ankho me phaila kajal"
+  // Restart song from the beginning of the music (0:10 of video)
   const handleRestart = () => {
     setCurrentTime(0);
-    sendYouTubeCommand('seekTo', [startOffset, true]);
+    sendYouTubeCommand('seekTo', [START_OFFSET, true]);
     if (!isPlaying) {
       handlePlay();
     }
@@ -128,25 +130,67 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
     }
   };
 
-  // Seek within the 120s cut
+  // Seek to specific timestamp (offset by START_OFFSET)
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = Number(e.target.value);
     setCurrentTime(newTime);
-    sendYouTubeCommand('seekTo', [startOffset + newTime, true]);
+    sendYouTubeCommand('seekTo', [newTime + START_OFFSET, true]);
   };
 
-  // Progress ticker for 120s duration
+  // Listen to YouTube player messages for live progress and track duration
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && data.event === 'infoDelivery' && data.info) {
+          if (typeof data.info.duration === 'number' && data.info.duration > 30) {
+            setDuration(Math.max(1, Math.round(data.info.duration) - START_OFFSET));
+          }
+          if (typeof data.info.currentTime === 'number') {
+            const rawSec = Math.round(data.info.currentTime);
+            // If playback lands before the 10s mark, immediately jump forward to avoid celebration voices
+            if (rawSec < START_OFFSET && isPlaying) {
+              sendYouTubeCommand('seekTo', [START_OFFSET, true]);
+              setCurrentTime(0);
+            } else {
+              setCurrentTime(Math.max(0, rawSec - START_OFFSET));
+            }
+          }
+          // Player state 0 is ENDED
+          if (data.info.playerState === 0) {
+            if (isLooping) {
+              sendYouTubeCommand('seekTo', [START_OFFSET, true]);
+              sendYouTubeCommand('playVideo');
+              setCurrentTime(0);
+            } else {
+              handlePause();
+              setCurrentTime(duration);
+            }
+          }
+        }
+      } catch {
+        // Ignore unparseable postMessages
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [isLooping, duration, isPlaying]);
+
+  // Fallback progress ticker ensuring smooth progress bar feedback
   useEffect(() => {
     if (isPlaying) {
       progressTimerRef.current = window.setInterval(() => {
         setCurrentTime((prev) => {
-          if (prev >= DURATION_LIMIT) {
+          if (prev >= duration) {
             if (isLooping) {
-              sendYouTubeCommand('seekTo', [startOffset, true]);
+              sendYouTubeCommand('seekTo', [START_OFFSET, true]);
               return 0;
             } else {
               handlePause();
-              return DURATION_LIMIT;
+              return duration;
             }
           }
           return prev + 1;
@@ -163,27 +207,19 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
         clearInterval(progressTimerRef.current);
       }
     };
-  }, [isPlaying, isLooping, startOffset]);
+  }, [isPlaying, isLooping, duration]);
 
-  // Sync volume on change
+  // Sync volume on state change
   useEffect(() => {
     if (isPlaying) {
       sendYouTubeCommand('setVolume', [isMuted ? 0 : volume]);
+      if (isMuted) {
+        sendYouTubeCommand('mute');
+      } else {
+        sendYouTubeCommand('unMute');
+      }
     }
   }, [volume, isMuted, isPlaying]);
-
-  // Switch video mode (Lyrics Cut vs Official Video)
-  const handleSwitchMode = (mode: 'lyrics' | 'official') => {
-    setVideoMode(mode);
-    setCurrentTime(0);
-    const newStart = mode === 'lyrics' ? 0 : 19;
-    setTimeout(() => {
-      sendYouTubeCommand('seekTo', [newStart, true]);
-      if (isPlaying) {
-        sendYouTubeCommand('playVideo');
-      }
-    }, 400);
-  };
 
   const formatSeconds = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -201,7 +237,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
           onOpen();
           setIsMinimized(false);
         }}
-        title="Play Kashish - 120s Instagram Banner Track (@iamarsalan_.18)"
+        title="Play Kashish - Ashish Bhatia, Omkar Singh & Kashish Ratnani"
         className="fixed bottom-5 right-5 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-neutral-900/90 hover:bg-neutral-800 text-white border border-pink-500/30 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 group"
       >
         <div className="relative w-7 h-7 rounded-full bg-gradient-to-tr from-rose-500 to-pink-500 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
@@ -211,12 +247,14 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
           )}
         </div>
         <div className="flex flex-col text-left">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-bold leading-tight">Kashish</span>
-            <span className="text-[10px] px-1 rounded bg-pink-500/20 text-pink-300 font-mono">120s</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-mono">
+              Soundtrack
+            </span>
           </div>
           <span className="text-[10px] text-neutral-400 leading-tight flex items-center gap-1">
-            From @iamarsalan_.18 IG Banner
+            Ashish Bhatia &amp; Omkar Singh
           </span>
         </div>
       </button>
@@ -229,8 +267,9 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
       <div className="hidden" aria-hidden="true">
         <iframe
           ref={iframeRef}
+          key={`yt-${currentVideoId}`}
           id="yt-kashish-player"
-          src={`https://www.youtube-nocookie.com/embed/${currentVideoId}?enablejsapi=1&start=${startOffset}&end=${endOffset}&controls=0&modestbranding=1&rel=0&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+          src={`https://www.youtube-nocookie.com/embed/${currentVideoId}?enablejsapi=1&controls=0&modestbranding=1&rel=0&playsinline=1&start=10&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
           title="Kashish Music Audio Player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           width="100"
@@ -249,8 +288,8 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
         }`}
       >
         {isMinimized ? (
-          /* Sleek Minimized Floating Pill */
-          <div className="flex items-center gap-3 p-2.5 px-4 rounded-2xl bg-white/95 border border-slate-200/90 shadow-xl backdrop-blur-2xl text-slate-900">
+          /* Sleek Minimized Floating Pill with Dark Aesthetics */
+          <div className="flex items-center gap-3 p-2.5 px-4 rounded-2xl bg-neutral-900/95 border border-neutral-800 shadow-2xl backdrop-blur-2xl text-white">
             <button
               type="button"
               onClick={togglePlayPause}
@@ -265,13 +304,13 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
               onClick={() => setIsMinimized(false)}
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-900">Kashish</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200/80 font-mono font-semibold">
-                  {formatSeconds(currentTime)}/2:00
+                <span className="text-xs font-bold text-white">Kashish</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono font-semibold">
+                  {formatSeconds(currentTime)}/{formatSeconds(duration)}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-500 truncate max-w-[150px]">
-                IG Banner: @iamarsalan_.18
+              <span className="text-[10px] text-neutral-400 truncate max-w-[150px]">
+                Ashish Bhatia &amp; Omkar Singh
               </span>
             </div>
 
@@ -279,11 +318,11 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
             <button
               type="button"
               onClick={toggleMute}
-              className="p-1.5 text-slate-400 hover:text-slate-800 transition-colors"
+              className="p-1.5 text-neutral-400 hover:text-white transition-colors"
               title={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted || volume === 0 ? (
-                <VolumeX className="w-4 h-4 text-rose-500" />
+                <VolumeX className="w-4 h-4 text-rose-400" />
               ) : (
                 <Volume2 className="w-4 h-4" />
               )}
@@ -293,7 +332,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
             <button
               type="button"
               onClick={() => setIsMinimized(false)}
-              className="p-1.5 text-slate-400 hover:text-slate-800 transition-colors"
+              className="p-1.5 text-neutral-400 hover:text-white transition-colors"
               title="Expand Music Pop-up"
             >
               <ChevronUp className="w-4 h-4" />
@@ -303,37 +342,37 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+              className="p-1.5 text-neutral-400 hover:text-neutral-300 transition-colors"
               title="Close Player"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          /* Full Aesthetic Pop-Up Card */
-          <div className="relative rounded-3xl p-5 sm:p-6 bg-white/95 border border-slate-200/90 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-2xl text-slate-900 overflow-hidden">
+          /* Full Aesthetic Pop-Up Card with Dark Theme Styling */
+          <div className="relative rounded-3xl p-5 sm:p-6 bg-neutral-900/95 border border-neutral-800/90 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl text-white overflow-hidden">
             {/* Ambient colorful glow behind player */}
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
             {/* Top Bar with title & window actions */}
-            <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-200/80">
+            <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-neutral-800">
               <div className="flex items-center gap-2">
                 <span className="flex h-2 w-2 relative">
                   <span
                     className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                      isPlaying ? 'bg-pink-400' : 'bg-slate-400'
+                      isPlaying ? 'bg-pink-400' : 'bg-neutral-600'
                     }`}
                   />
                   <span
                     className={`relative inline-flex rounded-full h-2 w-2 ${
-                      isPlaying ? 'bg-pink-500' : 'bg-slate-400'
+                      isPlaying ? 'bg-pink-500' : 'bg-neutral-500'
                     }`}
                   />
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  Official Audio Experience
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-pink-400" />
+                  Featured Soundtrack • Kashish
                 </span>
               </div>
 
@@ -343,7 +382,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                   id="music-minimize-btn"
                   type="button"
                   onClick={() => setIsMinimized(true)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
                   title="Minimize Player"
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -353,7 +392,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                   id="music-close-btn"
                   type="button"
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
                   title="Close Player"
                 >
                   <X className="w-4 h-4" />
@@ -361,13 +400,13 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
               </div>
             </div>
 
-            {/* Reason Banner: Played from Instagram Banner of @iamarsalan_.18 */}
+            {/* Reason Banner: Instagram link */}
             <a
               id="instagram-banner-reason-link"
               href="https://www.instagram.com/iamarsalan_.18/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-3.5 flex items-center justify-between gap-2 p-2.5 px-3 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 border border-pink-200/80 hover:border-pink-300 transition-all group shadow-xs"
+              className="mb-3.5 flex items-center justify-between gap-2 p-2.5 px-3 rounded-2xl bg-neutral-800/80 border border-neutral-700/60 hover:border-pink-500/50 transition-all group shadow-xs"
               title="Visit @iamarsalan_.18 on Instagram"
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -376,19 +415,19 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 </div>
                 <div className="min-w-0 text-left">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-slate-900 group-hover:text-pink-700 transition-colors">
-                      Instagram Banner Soundtrack
+                    <span className="text-[11px] font-bold text-white group-hover:text-pink-300 transition-colors">
+                      Instagram Featured Soundtrack
                     </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-100 text-pink-700 font-semibold border border-pink-200">
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-semibold border border-pink-500/30">
                       @iamarsalan_.18
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-600 truncate">
-                    Played directly from @iamarsalan_.18's official Instagram banner
+                  <p className="text-[10px] text-neutral-400 truncate">
+                    Curated track from @iamarsalan_.18's official Instagram profile
                   </p>
                 </div>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-pink-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 text-pink-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </a>
 
             {/* Song Identity & Spinning Vinyl Section */}
@@ -396,13 +435,13 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
               {/* Spinning Vinyl / Album Artwork */}
               <div className="relative w-18 h-18 sm:w-20 sm:h-20 shrink-0">
                 <div
-                  className={`w-full h-full rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-slate-100 transition-all ${
+                  className={`w-full h-full rounded-2xl overflow-hidden shadow-md border border-neutral-800 bg-neutral-800 transition-all ${
                     isPlaying ? 'ring-2 ring-pink-500/50 shadow-pink-500/20' : ''
                   }`}
                 >
                   <img
-                    src="https://i.ytimg.com/vi/1H8IW7Wt3g8/hqdefault.jpg"
-                    alt="Kashish - Ashish Bhatia"
+                    src="https://i.ytimg.com/vi/nwXAkF8OFCc/hqdefault.jpg"
+                    alt="Kashish - Ashish Bhatia, Omkar Singh & Kashish Ratnani"
                     className={`w-full h-full object-cover transition-transform duration-700 ${
                       isPlaying ? 'scale-105' : 'scale-100'
                     }`}
@@ -411,7 +450,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
 
                 {/* Animated Vinyl Grooves Overlay Badge */}
                 <div
-                  className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-pink-500 shadow-md ${
+                  className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-neutral-900 border border-neutral-700 flex items-center justify-center text-pink-400 shadow-md ${
                     isPlaying ? 'animate-[spin_4s_linear_infinite]' : ''
                   }`}
                 >
@@ -419,53 +458,59 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 </div>
               </div>
 
-              {/* Title, Artists, and 120s Badge */}
+              {/* Title and Artists */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-base sm:text-lg font-extrabold text-slate-900 truncate tracking-tight">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="text-base sm:text-lg font-extrabold text-white truncate tracking-tight">
                     Kashish
                   </h4>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-100 text-pink-700 border border-pink-200 font-mono">
-                    120s Cut
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono">
+                    Official Song
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-800 text-neutral-300 border border-neutral-700 font-mono">
+                    Clean Cut (0:10+)
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-600 truncate mt-0.5 font-medium">
-                  Ashish Bhatia, Omkar Singh, Kashish Ratnani
+                <p className="text-xs text-neutral-300 truncate mt-0.5 font-medium">
+                  Ashish Bhatia • Omkar Singh • Kashish Ratnani
                 </p>
 
-                {/* Starting lyrics hook indicator */}
+                {/* Soundtrack Tagline */}
                 <div className="mt-1.5 flex items-center gap-1.5">
-                  <Radio className={`w-3 h-3 ${isPlaying ? 'text-pink-500 animate-pulse' : 'text-slate-400'}`} />
-                  <span className="text-[11px] text-amber-700 font-mono italic truncate">
-                    Starts: "us ki ankho me phaila kajal"
+                  <Heart className={`w-3 h-3 ${isPlaying ? 'text-pink-400 fill-pink-400 animate-pulse' : 'text-neutral-500'}`} />
+                  <span className="text-[11px] text-pink-300 font-mono italic truncate">
+                    "Uski aankhon mein faila kajal..."
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Lyrics Card Highlight */}
+            {/* Lyrics Card with Iconic Kashish Lyrics */}
             {showLyrics && (
-              <div className="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center relative overflow-hidden">
-                <div className="text-xs font-serif leading-relaxed text-slate-700">
-                  <p className="font-semibold text-pink-700 text-[13px]">
+              <div className="mt-3 p-3.5 rounded-2xl bg-neutral-950/75 border border-neutral-800/90 text-center relative overflow-hidden shadow-inner">
+                <div className="text-xs font-serif leading-relaxed text-neutral-300 space-y-1">
+                  <p className="font-semibold text-pink-300 text-[13px]">
                     "Uski aankhon mein faila kajal, baaton se karti ghayal"
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Saanson mein uska hi hai naam • Raushan kar de tu mujhko aaj
+                  <p className="text-[12px] text-neutral-300">
+                    "Saanson mein uska hi hai naam... Meri neendein udi hai jab se, tu aa gayi jeevan mein"
+                  </p>
+                  <p className="text-[11.5px] text-pink-200/90 italic font-sans pt-1">
+                    "Maana kabhi kabhi, had se guzar jaata hoon tere pyaar mein... ❤️"
                   </p>
                 </div>
               </div>
             )}
 
-            {/* 120-Second (2:00) Progress Bar with Scrubbing */}
-            <div className="mt-4 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            {/* Progress Bar with Scrubbing */}
+            <div className="mt-3.5 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] text-neutral-400 font-mono">
                 <span>{formatSeconds(currentTime)}</span>
-                <div className="flex items-center gap-1 text-[10px] text-pink-600 font-semibold uppercase tracking-wider">
-                  <span>Duration: 120s (2:00)</span>
+                <div className="flex items-center gap-1 text-[10px] text-pink-400 font-semibold uppercase tracking-wider">
+                  <span>Kashish • Ashish Bhatia &amp; Omkar Singh</span>
                 </div>
-                <span>2:00</span>
+                <span>{formatSeconds(duration)}</span>
               </div>
 
               {/* Scrubbable Range Input */}
@@ -473,13 +518,13 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 <input
                   type="range"
                   min={0}
-                  max={DURATION_LIMIT}
+                  max={Math.max(1, duration)}
                   value={currentTime}
                   onChange={handleSeek}
                   aria-label="Song progress"
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer bg-slate-200 accent-pink-500 focus:outline-none"
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer bg-neutral-800 accent-pink-500 focus:outline-none"
                   style={{
-                    background: `linear-gradient(to right, #ec4899 ${(currentTime / DURATION_LIMIT) * 100}%, #e2e8f0 ${(currentTime / DURATION_LIMIT) * 100}%)`,
+                    background: `linear-gradient(to right, #ec4899 ${(currentTime / Math.max(1, duration)) * 100}%, #262626 ${(currentTime / Math.max(1, duration)) * 100}%)`,
                   }}
                 />
               </div>
@@ -501,90 +546,86 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
 
             {/* Primary Controls: Stop/Start & Restart */}
             <div className="mt-3 flex items-center justify-between gap-3">
-              {/* Loop toggle */}
-              <button
-                type="button"
-                onClick={() => setIsLooping(!isLooping)}
-                title={isLooping ? 'Looping 120s cut enabled' : 'Play once'}
-                className={`p-2 rounded-xl border transition-all ${
-                  isLooping
-                    ? 'border-pink-300 bg-pink-50 text-pink-700'
-                    : 'border-slate-200 text-slate-400 hover:text-slate-800'
-                }`}
-              >
-                <Repeat className="w-4 h-4" />
-              </button>
-
-              {/* Center Controls: Restart, Big Play/Pause, Lyrics Toggle */}
-              <div className="flex items-center gap-3">
-                {/* Restart from "us ki ankho me phaila kajal" */}
+              <div className="flex items-center gap-2">
+                {/* Restart song button */}
                 <button
                   id="music-restart-btn"
                   type="button"
                   onClick={handleRestart}
-                  title="Restart 120s snippet from 'us ki ankho me phaila kajal'"
-                  className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-all active:scale-95 shadow-xs"
+                  title="Restart song from beginning"
+                  className="p-2.5 rounded-xl border border-neutral-800 bg-neutral-800/60 hover:bg-neutral-800 text-neutral-300 hover:text-white transition-all shadow-xs active:scale-95"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
 
-                {/* Primary Stop/Start Button */}
+                {/* Primary Play/Pause Button */}
                 <button
                   id="music-play-pause-btn"
                   type="button"
                   onClick={togglePlayPause}
-                  className={`w-13 h-13 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-md active:scale-95 ${
-                    isPlaying
-                      ? 'bg-gradient-to-tr from-pink-600 to-rose-500 text-white shadow-pink-500/25 ring-2 ring-pink-400/40'
-                      : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/10'
-                  }`}
-                  title={isPlaying ? 'Stop Music (Pause)' : 'Start Music (Play)'}
+                  title={isPlaying ? 'Pause' : 'Play'}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-xs shadow-lg shadow-pink-500/20 active:scale-95 transition-all"
                 >
                   {isPlaying ? (
-                    <Pause className="w-6 h-6 fill-current" />
+                    <>
+                      <Pause className="w-4 h-4 fill-white" />
+                      <span>Pause</span>
+                    </>
                   ) : (
-                    <Play className="w-6 h-6 fill-current ml-0.5" />
+                    <>
+                      <Play className="w-4 h-4 fill-white ml-0.5" />
+                      <span>Play Track</span>
+                    </>
                   )}
-                </button>
-
-                {/* Toggle lyrics box */}
-                <button
-                  type="button"
-                  onClick={() => setShowLyrics(!showLyrics)}
-                  title={showLyrics ? 'Hide Lyrics' : 'Show Lyrics'}
-                  className={`p-2.5 rounded-xl border transition-all shadow-xs ${
-                    showLyrics
-                      ? 'border-slate-300 bg-slate-200/80 text-slate-900'
-                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <Music className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Mode switch: Lyrics vs Official */}
-              <button
-                type="button"
-                onClick={() => handleSwitchMode(videoMode === 'lyrics' ? 'official' : 'lyrics')}
-                title={`Switch audio source (Currently: ${videoMode === 'lyrics' ? 'Lyrics Audio' : 'Official MV'})`}
-                className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[10px] font-mono font-semibold text-slate-700 transition-all shadow-xs"
-              >
-                {videoMode === 'lyrics' ? 'Studio' : 'MV Cut'}
-              </button>
+              {/* Auxiliary Controls: Loop & Lyrics Toggle */}
+              <div className="flex items-center gap-1.5">
+                {/* Loop toggle */}
+                <button
+                  id="music-loop-toggle"
+                  type="button"
+                  onClick={() => setIsLooping(!isLooping)}
+                  title={isLooping ? 'Repeat: Enabled' : 'Repeat: Disabled'}
+                  className={`p-2 rounded-xl border transition-all ${
+                    isLooping
+                      ? 'border-pink-500/40 bg-pink-500/20 text-pink-300'
+                      : 'border-neutral-800 bg-neutral-800/50 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <Repeat className="w-4 h-4" />
+                </button>
+
+                {/* Lyrics visibility toggle */}
+                <button
+                  id="music-lyrics-toggle"
+                  type="button"
+                  onClick={() => setShowLyrics(!showLyrics)}
+                  title={showLyrics ? 'Hide Lyrics' : 'Show Lyrics'}
+                  className={`p-2 rounded-xl border transition-all ${
+                    showLyrics
+                      ? 'border-pink-500/40 bg-pink-500/20 text-pink-300'
+                      : 'border-neutral-800 bg-neutral-800/50 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Explicit Volume Controls: Decrease, Slider, Increase, Mute */}
-            <div className="mt-4 pt-3.5 border-t border-slate-200/80 flex items-center justify-between gap-3">
+            <div className="mt-4 pt-3.5 border-t border-neutral-800 flex items-center justify-between gap-3">
               {/* Mute toggle button */}
               <button
                 id="music-mute-btn"
                 type="button"
                 onClick={toggleMute}
-                className="p-1.5 text-slate-400 hover:text-slate-800 transition-colors shrink-0"
+                className="p-1.5 text-neutral-400 hover:text-white transition-colors shrink-0"
                 title={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted || volume === 0 ? (
-                  <VolumeX className="w-4 h-4 text-pink-500" />
+                  <VolumeX className="w-4 h-4 text-pink-400" />
                 ) : volume < 50 ? (
                   <Volume1 className="w-4 h-4" />
                 ) : (
@@ -599,7 +640,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 onClick={decreaseVolume}
                 disabled={volume === 0 || isMuted}
                 title="Decrease Volume (-10%)"
-                className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 flex items-center justify-center text-slate-700 transition-all shrink-0 shadow-xs"
+                className="w-7 h-7 rounded-lg border border-neutral-800 bg-neutral-800/60 hover:bg-neutral-800 disabled:opacity-40 flex items-center justify-center text-neutral-200 transition-all shrink-0 shadow-xs"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -614,12 +655,12 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                   value={isMuted ? 0 : volume}
                   onChange={(e) => handleVolumeChange(Number(e.target.value))}
                   aria-label="Adjust volume"
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer bg-slate-200 accent-pink-500 focus:outline-none"
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer bg-neutral-800 accent-pink-500 focus:outline-none"
                   style={{
-                    background: `linear-gradient(to right, #ec4899 ${isMuted ? 0 : volume}%, #e2e8f0 ${isMuted ? 0 : volume}%)`,
+                    background: `linear-gradient(to right, #ec4899 ${isMuted ? 0 : volume}%, #262626 ${isMuted ? 0 : volume}%)`,
                   }}
                 />
-                <span className="text-[11px] font-mono text-slate-500 w-8 text-right shrink-0">
+                <span className="text-[11px] font-mono text-neutral-400 w-8 text-right shrink-0">
                   {isMuted ? '0%' : `${volume}%`}
                 </span>
               </div>
@@ -631,7 +672,7 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 onClick={increaseVolume}
                 disabled={volume >= 100}
                 title="Increase Volume (+10%)"
-                className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 flex items-center justify-center text-slate-700 transition-all shrink-0 shadow-xs"
+                className="w-7 h-7 rounded-lg border border-neutral-800 bg-neutral-800/60 hover:bg-neutral-800 disabled:opacity-40 flex items-center justify-center text-neutral-200 transition-all shrink-0 shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -643,9 +684,9 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                 <button
                   type="button"
                   onClick={handlePlay}
-                  className="text-xs text-pink-600 hover:text-pink-700 font-semibold underline underline-offset-4 transition-colors"
+                  className="text-xs text-pink-400 hover:text-pink-300 font-semibold underline underline-offset-4 transition-colors"
                 >
-                  Tap to Start "Kashish" (120s • Starts at "us ki ankho me phaila kajal")
+                  Tap to Play "Kashish" by Ashish Bhatia &amp; Omkar Singh
                 </button>
               </div>
             )}

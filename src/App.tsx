@@ -434,7 +434,7 @@ export default function App() {
         profileName={profile.name}
       />
 
-      {/* Aesthetic Kashish Music Pop-up (45s Cut) */}
+      {/* Aesthetic Kashish Music Pop-up (Ashish Bhatia & Omkar Singh) */}
       <MusicPlayerPopup
         isOpen={isMusicOpen}
         onClose={() => setIsMusicOpen(false)}

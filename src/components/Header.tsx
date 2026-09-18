@@ -156,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
               id="header-music-btn"
               type="button"
               onClick={onToggleMusic}
-              title="Kashish - 120s (@iamarsalan_.18 Instagram Banner Track)"
+              title="Kashish - Ashish Bhatia & Omkar Singh"
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all backdrop-blur-md text-xs font-semibold shadow-sm ${getMusicBtnClass()}`}
             >
               <Music className="w-3.5 h-3.5" />
