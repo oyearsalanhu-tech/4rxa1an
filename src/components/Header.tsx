@@ -247,7 +247,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Avatar with aesthetic frame - decorated with Discord Nitro Dragon frame permanently */}
         <div className="relative group">
           {/* Discord Nitro Dragon Avatar Decoration (Kept permanently on profile picture) */}
-          <DiscordDragonAvatarFrame isActive={true} isOverdrive={isDragonActive} />
+          <DiscordDragonAvatarFrame isActive={true} />
 
           <div
             onClick={onOpenDragonEffect}
