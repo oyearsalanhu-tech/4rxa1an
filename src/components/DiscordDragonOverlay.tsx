@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Flame, X, Volume2, VolumeX } from 'lucide-react';
+import nitroDragonImg from '../assets/images/nitro_dragon_effect_1789880430051.jpg';
 
 interface DiscordDragonOverlayProps {
   isActive: boolean;
@@ -10,15 +10,12 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
   isActive,
   onComplete,
 }) => {
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [timeLeft, setTimeLeft] = useState<number>(5);
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Play subtle cinematic dragon whoosh using Web Audio API
   const playDragonSound = () => {
-    if (!soundEnabled) return;
     try {
       const AudioContextClass =
         window.AudioContext ||
@@ -50,7 +47,7 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
       filter.frequency.exponentialRampToValueAtTime(90, now + 1.6);
 
       gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.3);
+      gain.gain.linearRampToValueAtTime(0.10, now + 0.3);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
 
       osc.connect(filter);
@@ -77,7 +74,7 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
       noiseFilter.Q.setValueAtTime(2.2, now);
 
       const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.08, now);
+      noiseGain.gain.setValueAtTime(0.07, now);
       noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
 
       noiseSource.connect(noiseFilter);
@@ -91,22 +88,16 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
     }
   };
 
-  // 5-second countdown timer with smooth fadeout at the end
+  // 5-second countdown with smooth fadeout at the end
   useEffect(() => {
     if (!isActive) return;
 
-    setTimeLeft(5);
     setIsFadingOut(false);
 
     // Audio cue
     const soundTimeout = setTimeout(() => {
       playDragonSound();
     }, 200);
-
-    // Countdown interval for visual progress
-    const countdownInterval = setInterval(() => {
-      setTimeLeft((prev) => Math.max(0, prev - 1));
-    }, 1000);
 
     // Begin fadeout at 4.2 seconds
     const fadeoutTimeout = setTimeout(() => {
@@ -120,7 +111,6 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
     return () => {
       clearTimeout(soundTimeout);
-      clearInterval(countdownInterval);
       clearTimeout(fadeoutTimeout);
       clearTimeout(completeTimeout);
     };
@@ -237,12 +227,16 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
       {/* 3. The Grand Discord Nitro Dragon Figure rising at the top hero section */}
       <div className="absolute top-0 inset-x-0 flex justify-center pointer-events-none z-10 overflow-hidden h-[360px] sm:h-[450px]">
-        <div className="relative w-full max-w-4xl h-full flex items-start justify-center animate-in fade-in zoom-in-95 duration-1000">
+        <div className="relative w-full max-w-4xl h-full flex items-start justify-center animate-in fade-in zoom-in-95 duration-1000 pointer-events-none">
           <img
-            src="/src/assets/images/nitro_dragon_effect_1789880430051.jpg"
-            alt="Discord Nitro Dragon Effect"
+            src={nitroDragonImg}
+            alt=""
+            aria-hidden="true"
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover object-top opacity-85 filter drop-shadow-[0_0_40px_rgba(249,115,22,0.85)] mix-blend-screen"
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = 'none';
+            }}
+            className="w-full h-full object-cover object-top opacity-85 filter drop-shadow-[0_0_40px_rgba(249,115,22,0.85)] mix-blend-screen pointer-events-none"
             style={{
               maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
@@ -251,33 +245,6 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
           {/* Shockwave radial glow pulsing behind the dragon */}
           <div className="absolute top-10 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-orange-600/30 filter blur-3xl animate-pulse pointer-events-none" />
-        </div>
-      </div>
-
-      {/* 4. Elegant Top Status Pill with 5-Second Timer & Sound Control (interactive) */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/75 border border-orange-500/40 shadow-2xl backdrop-blur-md text-xs text-orange-200">
-        <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
-        <span className="font-bold tracking-wide">Nitro Dragon Effect</span>
-        <span className="w-1 h-1 rounded-full bg-orange-500/60" />
-        <span className="font-mono text-orange-300 font-bold">{timeLeft}s</span>
-
-        <div className="flex items-center gap-1 ml-1 pl-1.5 border-l border-white/10">
-          <button
-            type="button"
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            title={soundEnabled ? 'Mute roar' : 'Enable roar'}
-            className="p-1 rounded-full hover:bg-white/10 text-orange-300 transition-colors"
-          >
-            {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-          </button>
-          <button
-            type="button"
-            onClick={onComplete}
-            title="Skip dragon effect"
-            className="p-1 rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
     </aside>
