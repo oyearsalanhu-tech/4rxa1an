@@ -6,6 +6,7 @@ import { PlatformCard } from './components/PlatformCard';
 import { ContactSection } from './components/ContactSection';
 import { ShareModal } from './components/ShareModal';
 import { MusicPlayerPopup } from './components/MusicPlayerPopup';
+import { DiscordDragonOverlay } from './components/DiscordDragonOverlay';
 import { Toast } from './components/Toast';
 import { VisitorBadge } from './components/VisitorBadge';
 import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon } from './components/SocialIcons';
@@ -57,6 +58,7 @@ export default function App() {
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isMusicOpen, setIsMusicOpen] = useState(true);
+  const [isDragonActive, setIsDragonActive] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
@@ -188,6 +190,8 @@ export default function App() {
           onCopyProfileLink={handleCopyProfileLink}
           isCopied={copiedLink}
           onToggleMusic={() => setIsMusicOpen((prev) => !prev)}
+          onOpenDragonEffect={() => setIsDragonActive(true)}
+          isDragonActive={isDragonActive}
         />
 
         {/* Quick-Access Flagship Channels (Instagram, YouTube, TikTok, Threads, Discord) */}
@@ -347,10 +351,10 @@ export default function App() {
         <div className="flex items-center justify-between gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
           <div className="flex items-center gap-1.5">
             {[
-              { id: 'all', label: 'All Channels' },
-              { id: 'video', label: 'Video (YouTube & TikTok)' },
-              { id: 'visual', label: 'Visual (Instagram)' },
-              { id: 'community', label: 'Community (Discord & Threads)' },
+              { id: 'all', label: 'All Channels', shortLabel: 'All' },
+              { id: 'video', label: 'Video (YouTube & TikTok)', shortLabel: 'Video' },
+              { id: 'visual', label: 'Visual (Instagram)', shortLabel: 'Visual' },
+              { id: 'community', label: 'Community (Discord & Threads)', shortLabel: 'Community' },
             ].map((cat) => {
               const isActive = filterCategory === cat.id;
               let activeColorClass = 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-1 ring-blue-400';
@@ -368,7 +372,8 @@ export default function App() {
                       : 'bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800'
                   }`}
                 >
-                  {cat.label}
+                  <span className="sm:hidden">{cat.shortLabel}</span>
+                  <span className="hidden sm:inline">{cat.label}</span>
                 </button>
               );
             })}
@@ -432,6 +437,12 @@ export default function App() {
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         profileName={profile.name}
+      />
+
+      {/* Discord Nitro Crimson Dragon Profile Effect Overlay (Plays for 5 seconds on load, then vanishes) */}
+      <DiscordDragonOverlay
+        isActive={isDragonActive}
+        onComplete={() => setIsDragonActive(false)}
       />
 
       {/* Aesthetic Kashish Music Pop-up (Ashish Bhatia & Omkar Singh) */}
