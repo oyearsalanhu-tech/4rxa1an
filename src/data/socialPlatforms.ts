@@ -6,7 +6,7 @@ export const initialProfile: UserProfile = {
   bio: 'Crafting cinematic video edits, aesthetic reels, short-form content, and visual storytelling. Connect with me across my platforms below.',
   location: 'Worldwide / Remote',
   email: 'oyearsalanhu@gmail.com',
-  avatarUrl: '/avatar.png?v=virat18_celebration',
+  avatarUrl: '/avatar.png?v=real_dragon_wings_18',
   bannerText: 'Available for creative collaborations & video editing projects',
   verified: true,
   statusBadge: 'Open for video editing & creator collabs',

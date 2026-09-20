@@ -3,180 +3,218 @@ import React from 'react';
 interface DiscordDragonAvatarFrameProps {
   isActive?: boolean;
   className?: string;
+  isOverdrive?: boolean;
 }
 
 export const DiscordDragonAvatarFrame: React.FC<DiscordDragonAvatarFrameProps> = ({
   isActive = true,
   className = '',
+  isOverdrive = false,
 }) => {
   return (
     <div
       aria-hidden="true"
-      className={`absolute -inset-4 sm:-inset-5 pointer-events-none z-20 transition-all duration-700 ease-out select-none ${
-        isActive
-          ? 'opacity-100 scale-100'
-          : 'opacity-0 scale-90'
+      className={`absolute -inset-8 sm:-inset-10 pointer-events-none z-0 transition-all duration-700 ease-out select-none ${
+        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
       } ${className}`}
     >
       <svg
-        viewBox="0 0 180 180"
+        viewBox="0 0 280 220"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full filter drop-shadow-[0_0_14px_rgba(255,87,34,0.9)]"
+        className={`w-full h-full filter transition-all duration-500 ${
+          isOverdrive
+            ? 'drop-shadow-[0_0_32px_rgba(255,87,34,1)] scale-105'
+            : 'drop-shadow-[0_0_20px_rgba(255,69,0,0.85)]'
+        }`}
       >
         <defs>
-          {/* Fiery Ring Linear & Radial Gradients */}
-          <linearGradient id="dragonGoldFire" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FFF275" />
-            <stop offset="25%" stopColor="#FF8C00" />
-            <stop offset="60%" stopColor="#FF3D00" />
-            <stop offset="100%" stopColor="#990000" />
+          {/* Molten Magma Dragon Wing Gradients */}
+          <linearGradient id="realDragonWingMembrane" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFF7A1" stopOpacity="0.95" />
+            <stop offset="20%" stopColor="#FF9100" stopOpacity="0.9" />
+            <stop offset="50%" stopColor="#E53935" stopOpacity="0.85" />
+            <stop offset="80%" stopColor="#7F0000" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#2A0000" stopOpacity="0.9" />
           </linearGradient>
 
-          <linearGradient id="dragonWingGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#7A0000" />
-            <stop offset="40%" stopColor="#D82600" />
-            <stop offset="75%" stopColor="#FF6200" />
-            <stop offset="100%" stopColor="#FFC837" />
+          <linearGradient id="realDragonBoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFF176" />
+            <stop offset="30%" stopColor="#FFA726" />
+            <stop offset="70%" stopColor="#D84315" />
+            <stop offset="100%" stopColor="#3E1508" />
           </linearGradient>
 
-          <radialGradient id="fireBallCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="20%" stopColor="#FFF385" />
-            <stop offset="55%" stopColor="#FF5722" />
-            <stop offset="85%" stopColor="#D50000" />
-            <stop offset="100%" stopColor="transparent" />
+          <linearGradient id="dragonVeinGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#FFE082" stopOpacity="0.9" />
+            <stop offset="50%" stopColor="#FF7043" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#B71C1C" stopOpacity="0.2" />
+          </linearGradient>
+
+          <radialGradient id="avatarMagmaHalo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FF8F00" stopOpacity="0.4" />
+            <stop offset="45%" stopColor="#D84315" stopOpacity="0.25" />
+            <stop offset="75%" stopColor="#BF360C" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
           </radialGradient>
 
-          <radialGradient id="fireBallGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FF9800" stopOpacity="0.9" />
-            <stop offset="60%" stopColor="#FF3D00" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#D50000" stopOpacity="0" />
-          </radialGradient>
+          <linearGradient id="ringObsidianMagma" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFE082" />
+            <stop offset="30%" stopColor="#FF6D00" />
+            <stop offset="70%" stopColor="#D50000" />
+            <stop offset="100%" stopColor="#4A0E00" />
+          </linearGradient>
 
-          <filter id="fireGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <filter id="dragonGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+
+          <filter id="softEmberGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.8" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
 
-        {/* 1. Outer Dragon Wings Hugging the Profile (Left & Right Symmetric) */}
-        <g className="animate-pulse" style={{ animationDuration: '2.5s' }}>
-          {/* Left Dragon Wing Crest */}
+        {/* 1. Volcanic Heat Aura behind avatar center */}
+        <circle cx="140" cy="110" r="85" fill="url(#avatarMagmaHalo)" />
+
+        {/* 2. REALISTIC DRAGON WINGS (LEFT & RIGHT) */}
+        {/* Left Wing Group with smooth breathing motion */}
+        <g
+          className="origin-[140px_110px] animate-[pulse_4s_ease-in-out_infinite]"
+          style={{ transformOrigin: '140px 110px' }}
+        >
+          {/* Left Wing - Lower Webbing Membrane */}
           <path
-            d="M 45 42 C 28 28 14 42 10 58 C 8 66 12 70 17 65 C 22 60 27 50 40 52 C 28 62 25 76 30 84 C 34 90 38 88 39 80 C 42 68 50 58 60 52 Z"
-            fill="url(#dragonWingGradient)"
-            opacity="0.95"
-          />
-          {/* Left Wing Bone Ribs */}
-          <path
-            d="M 44 43 C 24 30 15 48 12 59"
-            stroke="#FFD54F"
-            strokeWidth="1.5"
-            strokeLinecap="round"
+            d="M 115 125 C 95 135 70 162 48 168 C 58 152 64 140 68 126 C 48 132 28 130 18 120 C 32 110 46 100 66 94 C 38 92 18 80 12 66 C 30 64 54 70 78 78 C 52 60 36 44 32 30 C 52 34 82 50 110 82 Z"
+            fill="url(#realDragonWingMembrane)"
+            opacity="0.88"
           />
 
-          {/* Right Dragon Wing Crest */}
+          {/* Left Wing - Translucent Fiery Vein Overlays */}
           <path
-            d="M 135 42 C 152 28 166 42 170 58 C 172 66 168 70 163 65 C 158 60 153 50 140 52 C 152 62 155 76 150 84 C 146 90 142 88 141 80 C 138 68 130 58 120 52 Z"
-            fill="url(#dragonWingGradient)"
-            opacity="0.95"
-          />
-          {/* Right Wing Bone Ribs */}
-          <path
-            d="M 136 43 C 156 30 165 48 168 59"
-            stroke="#FFD54F"
-            strokeWidth="1.5"
+            d="M 108 84 Q 72 62 36 34 M 106 88 Q 62 82 16 68 M 104 94 Q 68 108 22 122 M 106 104 Q 82 136 50 166"
+            stroke="url(#dragonVeinGlow)"
+            strokeWidth="1.6"
             strokeLinecap="round"
+            opacity="0.75"
+          />
+
+          {/* Left Wing - Main Arm / Bone Spar with Talon */}
+          <path
+            d="M 116 112 C 105 88 92 64 74 46 C 62 34 46 25 32 24 C 33 28 36 33 42 38 C 56 50 72 68 86 92 C 96 108 108 118 116 122 Z"
+            fill="url(#realDragonBoneGrad)"
+            filter="url(#dragonGlowFilter)"
+          />
+
+          {/* Left Wing Thumb Claw / Talon at apex */}
+          <path
+            d="M 32 24 C 27 19 22 17 18 18 C 22 22 26 27 33 30 Z"
+            fill="#FFF59D"
+            stroke="#FF6F00"
+            strokeWidth="0.8"
+          />
+
+          {/* Secondary Finger Ribs */}
+          <path
+            d="M 76 48 C 55 60 34 70 14 68 C 16 71 20 74 26 74 C 44 74 62 66 78 52 Z"
+            fill="url(#realDragonBoneGrad)"
+            opacity="0.85"
+          />
+          <path
+            d="M 86 70 C 64 88 44 104 20 122 C 23 124 28 125 34 123 C 52 110 68 96 88 74 Z"
+            fill="url(#realDragonBoneGrad)"
+            opacity="0.8"
           />
         </g>
 
-        {/* 2. Top Dragon Horns & Royal Crest */}
+        {/* Right Wing Group (Symmetrically mirrored with subtle organic offset) */}
+        <g
+          className="origin-[140px_110px] animate-[pulse_4s_ease-in-out_infinite]"
+          style={{ transformOrigin: '140px 110px', animationDelay: '0.2s' }}
+        >
+          {/* Right Wing - Webbing Membrane */}
+          <path
+            d="M 165 125 C 185 135 210 162 232 168 C 222 152 216 140 212 126 C 232 132 252 130 262 120 C 248 110 234 100 214 94 C 242 92 262 80 268 66 C 250 64 226 70 202 78 C 228 60 244 44 248 30 C 228 34 198 50 170 82 Z"
+            fill="url(#realDragonWingMembrane)"
+            opacity="0.88"
+          />
+
+          {/* Right Wing - Vein Overlays */}
+          <path
+            d="M 172 84 Q 208 62 244 34 M 174 88 Q 218 82 264 68 M 176 94 Q 212 108 258 122 M 174 104 Q 198 136 230 166"
+            stroke="url(#dragonVeinGlow)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            opacity="0.75"
+          />
+
+          {/* Right Wing - Main Bone Spar with Talon */}
+          <path
+            d="M 164 112 C 175 88 188 64 206 46 C 218 34 234 25 248 24 C 247 28 244 33 238 38 C 224 50 208 68 194 92 C 184 108 172 118 164 122 Z"
+            fill="url(#realDragonBoneGrad)"
+            filter="url(#dragonGlowFilter)"
+          />
+
+          {/* Right Wing Thumb Claw / Talon at apex */}
+          <path
+            d="M 248 24 C 253 19 258 17 262 18 C 258 22 254 27 247 30 Z"
+            fill="#FFF59D"
+            stroke="#FF6F00"
+            strokeWidth="0.8"
+          />
+
+          {/* Right Secondary Finger Ribs */}
+          <path
+            d="M 204 48 C 225 60 246 70 266 68 C 264 71 260 74 254 74 C 236 74 218 66 202 52 Z"
+            fill="url(#realDragonBoneGrad)"
+            opacity="0.85"
+          />
+          <path
+            d="M 194 70 C 216 88 236 104 260 122 C 257 124 252 125 246 123 C 228 110 212 96 192 74 Z"
+            fill="url(#realDragonBoneGrad)"
+            opacity="0.8"
+          />
+        </g>
+
+        {/* 3. Molten Magma Runic Ring Framing the Avatar */}
         <g>
-          {/* Left Horn */}
-          <path
-            d="M 72 26 C 68 14 62 8 52 4 C 54 12 60 20 68 28 Z"
-            fill="url(#dragonGoldFire)"
+          {/* Subtle Outer Energy Orbit */}
+          <circle
+            cx="140"
+            cy="110"
+            r="63"
+            stroke="url(#ringObsidianMagma)"
+            strokeWidth="2.5"
+            strokeDasharray="18 8 6 8"
+            className="origin-[140px_110px] animate-[spin_16s_linear_infinite]"
+            opacity="0.85"
           />
-          {/* Right Horn */}
-          <path
-            d="M 108 26 C 112 14 118 8 128 4 C 126 12 120 20 112 28 Z"
-            fill="url(#dragonGoldFire)"
-          />
-          {/* Center Crown Spike */}
-          <path
-            d="M 90 16 L 95 25 L 85 25 Z"
-            fill="#FFF176"
-            filter="url(#fireGlowFilter)"
-          />
-        </g>
 
-        {/* 3. Circular Magma Energy Ring Encircling the Avatar */}
-        <circle
-          cx="90"
-          cy="90"
-          r="66"
-          stroke="url(#dragonGoldFire)"
-          strokeWidth="3.5"
-          strokeDasharray="14 4 6 4"
-          className="origin-center animate-[spin_8s_linear_infinite]"
-          opacity="0.9"
-        />
-        <circle
-          cx="90"
-          cy="90"
-          r="68.5"
-          stroke="#FF5722"
-          strokeWidth="1.5"
-          strokeDasharray="2 8"
-          className="origin-center animate-[spin_12s_linear_infinite_reverse]"
-          opacity="0.75"
-        />
-
-        {/* 4. Professional Fiery Fireball Orb / Dragon Core (Positioned at bottom-left corner of the avatar ring) */}
-        <g transform="translate(32, 134)">
-          {/* Ambient Outer Halo */}
-          <circle cx="0" cy="0" r="22" fill="url(#fireBallGlow)" />
-
-          {/* Whirling Flame Wisps around the Fireball */}
-          <g className="origin-center animate-[spin_3s_linear_infinite]">
-            <path
-              d="M 0 -14 C 6 -12 10 -4 9 2 C 8 8 2 13 -4 11 C -10 9 -13 0 -9 -6 C -6 -11 -2 -13 0 -14 Z"
-              fill="#FF3D00"
-              opacity="0.8"
-            />
-            <path
-              d="M 0 -10 C 4 -8 7 -2 6 2 C 5 6 1 9 -3 8 C -7 7 -9 0 -6 -4 C -4 -7 -1 -9 0 -10 Z"
-              fill="#FF9100"
-              opacity="0.9"
-            />
-          </g>
-
-          {/* Glowing Incandescent Core */}
-          <circle cx="0" cy="0" r="11" fill="url(#fireBallCore)" filter="url(#fireGlowFilter)" />
-          <circle cx="-2" cy="-2" r="4" fill="#FFFFFF" opacity="0.9" />
-
-          {/* Dragon Claw holding the Fireball */}
-          <path
-            d="M -14 6 C -11 0 -4 -10 4 -12 C 2 -8 -2 -4 -6 0 C -9 4 -12 7 -14 6 Z"
-            fill="#5C0000"
-            stroke="#FFAB00"
-            strokeWidth="0.8"
-          />
-          <path
-            d="M -10 14 C -6 9 3 5 12 1 C 8 5 3 9 -1 12 C -4 14 -8 15 -10 14 Z"
-            fill="#5C0000"
-            stroke="#FFAB00"
-            strokeWidth="0.8"
+          {/* Counter-rotating Inner Fiery Accents */}
+          <circle
+            cx="140"
+            cy="110"
+            r="60"
+            stroke="#FF9100"
+            strokeWidth="1.2"
+            strokeDasharray="4 14"
+            className="origin-[140px_110px] animate-[spin_10s_linear_infinite_reverse]"
+            opacity="0.7"
           />
         </g>
 
-        {/* Tiny Floating Fire Embers around the ring */}
-        <circle cx="140" cy="120" r="2" fill="#FFEB3B" className="animate-ping" style={{ animationDuration: '1.8s' }} />
-        <circle cx="125" cy="142" r="1.5" fill="#FF7043" className="animate-pulse" style={{ animationDuration: '1.2s' }} />
-        <circle cx="38" cy="75" r="1.8" fill="#FFC107" className="animate-ping" style={{ animationDuration: '2.2s' }} />
-        <circle cx="82" cy="22" r="1.2" fill="#FFE082" />
-        <circle cx="98" cy="22" r="1.2" fill="#FFE082" />
+        {/* 4. Realistic Floating Fire Embers & Dragon Ash */}
+        <g filter="url(#softEmberGlow)">
+          <circle cx="95" cy="45" r="2.2" fill="#FFF176" className="animate-pulse" style={{ animationDuration: '1.4s' }} />
+          <circle cx="185" cy="42" r="2" fill="#FFD54F" className="animate-ping" style={{ animationDuration: '2.5s' }} />
+          <circle cx="48" cy="85" r="1.8" fill="#FF7043" className="animate-pulse" style={{ animationDuration: '1.8s' }} />
+          <circle cx="232" cy="88" r="2.4" fill="#FFAB00" className="animate-pulse" style={{ animationDuration: '2.1s' }} />
+          <circle cx="70" cy="140" r="1.5" fill="#FF5722" />
+          <circle cx="210" cy="142" r="1.7" fill="#FF8A65" />
+          <circle cx="140" cy="38" r="2" fill="#FFF9C4" className="animate-pulse" style={{ animationDuration: '1.1s' }} />
+        </g>
       </svg>
     </div>
   );
