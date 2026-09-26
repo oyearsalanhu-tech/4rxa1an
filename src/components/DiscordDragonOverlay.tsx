@@ -28,7 +28,19 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
-          // Autoplay restriction fallback
+          // Autoplay restriction fallback: play on first user tap/click
+          const unlock = () => {
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play().catch(() => {});
+            }
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('touchstart', unlock);
+            window.removeEventListener('scroll', unlock);
+          };
+          window.addEventListener('click', unlock, { once: true });
+          window.addEventListener('touchstart', unlock, { once: true });
+          window.addEventListener('scroll', unlock, { once: true });
         });
       }
     } catch {

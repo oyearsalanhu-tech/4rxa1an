@@ -58,9 +58,36 @@ export default function App() {
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isMusicOpen, setIsMusicOpen] = useState(true);
-  const [isDragonActive, setIsDragonActive] = useState(false);
+  const [isDragonActive, setIsDragonActive] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+
+  // Automatically trigger the animated dragon overlay with roar sound when a visitor opens the website
+  useEffect(() => {
+    setIsDragonActive(true);
+    try {
+      const audio = new Audio('/dragon_roar.wav');
+      audio.volume = 0.85;
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          // If browser restricts un-interacted autoplay with audio, unlock on first gesture
+          const unlock = () => {
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('touchstart', unlock);
+          };
+          window.addEventListener('click', unlock, { once: true });
+          window.addEventListener('touchstart', unlock, { once: true });
+        });
+      }
+    } catch {
+      // Audio fallback handled gracefully
+    }
+
+    showToast('🐉 Welcome to Arsalan Social Hub • Crimson Dragon Surge!', 'success');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('arsalan_hub_profile_v6', JSON.stringify(profile));
