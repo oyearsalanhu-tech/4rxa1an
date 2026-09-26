@@ -115,21 +115,21 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action buttons on Mobile (Share, Dragon, Music) */}
           <div className="flex sm:hidden items-center gap-1.5 shrink-0">
-            {/* Discord Nitro Dragon Effect Trigger */}
+            {/* 4K Red Wings Effect Trigger */}
             {onOpenDragonEffect && (
               <button
                 id="header-dragon-effect-btn-mobile"
                 type="button"
                 onClick={onOpenDragonEffect}
-                title={isDragonActive ? "Dragon Effect Active" : "Trigger Dragon Effect (5s)"}
+                title={isDragonActive ? "4K Red Wings Flare Active" : "Trigger 4K Red Wings Flare (5s)"}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border transition-all backdrop-blur-md text-[11px] font-bold shadow-sm active:scale-95 ${
                   isDragonActive
-                    ? 'border-orange-500 bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 text-white shadow-orange-500/50 animate-pulse'
-                    : 'border-orange-500/40 bg-gradient-to-r from-red-950/80 via-orange-950/70 to-amber-950/80 text-orange-200 hover:text-white shadow-orange-950/40'
+                    ? 'border-red-500 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 text-white shadow-red-500/50 animate-pulse'
+                    : 'border-red-500/40 bg-gradient-to-r from-red-950/80 via-rose-950/70 to-red-950/80 text-rose-200 hover:text-white shadow-red-950/40'
                 }`}
               >
-                <Flame className={`w-3.5 h-3.5 ${isDragonActive ? 'text-yellow-200 animate-bounce' : 'text-orange-400'}`} />
-                <span>Dragon</span>
+                <Flame className={`w-3.5 h-3.5 ${isDragonActive ? 'text-rose-200 animate-bounce' : 'text-red-400'}`} />
+                <span>Wings</span>
               </button>
             )}
 
@@ -207,21 +207,21 @@ export const Header: React.FC<HeaderProps> = ({
               <Share2 className="w-4 h-4" />
             </button>
 
-            {/* Discord Nitro Dragon Effect Trigger */}
+            {/* 4K Crimson Wings Effect Trigger */}
             {onOpenDragonEffect && (
               <button
                 id="header-dragon-effect-btn"
                 type="button"
                 onClick={onOpenDragonEffect}
-                title={isDragonActive ? "Discord Nitro Dragon Effect Playing..." : "Trigger Discord Nitro Dragon Effect (5s)"}
+                title={isDragonActive ? "4K Crimson Wings Active (5s)" : "Trigger 4K Crimson Wings Flare (5s)"}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all backdrop-blur-md text-xs font-bold shadow-lg hover:scale-105 active:scale-95 group ${
                   isDragonActive
-                    ? 'border-orange-500 bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 text-white shadow-orange-500/50 animate-pulse'
-                    : 'border-orange-500/40 bg-gradient-to-r from-red-950/80 via-orange-950/70 to-amber-950/80 hover:border-orange-400 text-orange-200 hover:text-white shadow-orange-950/40'
+                    ? 'border-red-500 bg-gradient-to-r from-red-600 via-rose-600 to-red-500 text-white shadow-red-500/50 animate-pulse'
+                    : 'border-red-500/40 bg-gradient-to-r from-red-950/80 via-rose-950/70 to-red-950/80 hover:border-red-400 text-rose-200 hover:text-white shadow-red-950/40'
                 }`}
               >
-                <Flame className={`w-3.5 h-3.5 ${isDragonActive ? 'text-yellow-200 animate-bounce' : 'text-orange-400 group-hover:animate-pulse'}`} />
-                <span>{isDragonActive ? 'Dragon 5s' : 'Dragon'}</span>
+                <Flame className={`w-3.5 h-3.5 ${isDragonActive ? 'text-rose-200 animate-bounce' : 'text-red-400 group-hover:animate-pulse'}`} />
+                <span>{isDragonActive ? 'Wings 5s' : 'Wings'}</span>
               </button>
             )}
 
@@ -244,16 +244,16 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Main Profile Info */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-        {/* Avatar with aesthetic frame - decorated with Discord Nitro Dragon frame permanently */}
+        {/* Avatar with aesthetic frame - decorated with 4K Animated Crimson Red Wings frame */}
         <div className="relative group">
-          {/* Discord Nitro Dragon Avatar Decoration (Kept permanently on profile picture) */}
-          <DiscordDragonAvatarFrame isActive={true} />
+          {/* 4K Animated Crimson Red Wings Avatar Decoration (Kept permanently on profile picture) */}
+          <DiscordDragonAvatarFrame isActive={true} isOverdrive={isDragonActive} />
 
           <div
             onClick={onOpenDragonEffect}
             role="button"
             tabIndex={0}
-            title="Discord Nitro Dragon Avatar (Click to play Dragon roar effect)"
+            title="4K Animated Crimson Wings (Click to play Dragon roar flare)"
             className={`relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden p-1 backdrop-blur-md cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 ${getAvatarRing()}`}
           >
             <img

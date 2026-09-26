@@ -150,7 +150,7 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
     }
 
     const particles: Particle[] = [];
-    const colors = ['#f97316', '#ef4444', '#f59e0b', '#fbbf24', '#ff7849'];
+    const colors = ['#ff003f', '#ef233c', '#d90429', '#ff4d6d', '#ff758f', '#b3001b'];
 
     for (let i = 0; i < 45; i++) {
       particles.push({
@@ -222,8 +222,8 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-20"
       />
 
-      {/* 2. Atmospheric volcanic dark vignette and glowing amber gradients */}
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-950/40 via-red-950/15 to-transparent pointer-events-none z-10" />
+      {/* 2. Atmospheric volcanic dark vignette and glowing crimson gradients */}
+      <div className="absolute inset-0 bg-gradient-to-b from-red-950/45 via-rose-950/20 to-transparent pointer-events-none z-10" />
 
       {/* 3. The Grand Discord Nitro Dragon Figure rising at the top hero section */}
       <div className="absolute top-0 inset-x-0 flex justify-center pointer-events-none z-10 overflow-hidden h-[360px] sm:h-[450px]">
@@ -236,7 +236,7 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
             onError={(e) => {
               (e.currentTarget as HTMLElement).style.display = 'none';
             }}
-            className="w-full h-full object-cover object-top opacity-85 filter drop-shadow-[0_0_40px_rgba(249,115,22,0.85)] mix-blend-screen pointer-events-none"
+            className="w-full h-full object-cover object-top opacity-85 filter drop-shadow-[0_0_40px_rgba(255,0,63,0.85)] mix-blend-screen pointer-events-none"
             style={{
               maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
@@ -244,7 +244,7 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
           />
 
           {/* Shockwave radial glow pulsing behind the dragon */}
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-orange-600/30 filter blur-3xl animate-pulse pointer-events-none" />
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-red-600/30 filter blur-3xl animate-pulse pointer-events-none" />
         </div>
       </div>
     </aside>
