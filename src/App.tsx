@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, SocialPlatform, ThemeMode } from './types';
 import { initialProfile, defaultPlatforms } from './data/socialPlatforms';
 import { Header } from './components/Header';
+import { DiscordDragonOverlay } from './components/DiscordDragonOverlay';
 import { PlatformCard } from './components/PlatformCard';
 import { ContactSection } from './components/ContactSection';
 import { ShareModal } from './components/ShareModal';
 import { MusicPlayerPopup } from './components/MusicPlayerPopup';
-import { DiscordDragonOverlay } from './components/DiscordDragonOverlay';
 import { Toast } from './components/Toast';
 import { VisitorBadge } from './components/VisitorBadge';
 import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon } from './components/SocialIcons';
@@ -14,11 +14,11 @@ import { Sparkles, ArrowUpRight, Compass } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('arsalan_hub_profile_v5');
+    const saved = localStorage.getItem('arsalan_hub_profile_v6');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (!parsed.avatarUrl || parsed.avatarUrl.includes('v4') || parsed.avatarUrl === '/avatar.jpg') {
+        if (!parsed.avatarUrl || parsed.avatarUrl.includes('red_wings') || parsed.avatarUrl === '/avatar.jpg' || parsed.avatarUrl === '/avatar.png') {
           parsed.avatarUrl = '/avatar.png?v=virat18_celebration';
         }
         return parsed;
@@ -58,12 +58,12 @@ export default function App() {
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isMusicOpen, setIsMusicOpen] = useState(true);
-  const [isDragonActive, setIsDragonActive] = useState(true);
+  const [isDragonActive, setIsDragonActive] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   useEffect(() => {
-    localStorage.setItem('arsalan_hub_profile_v5', JSON.stringify(profile));
+    localStorage.setItem('arsalan_hub_profile_v6', JSON.stringify(profile));
   }, [profile]);
 
   useEffect(() => {
@@ -93,6 +93,19 @@ export default function App() {
     setCopiedLink(true);
     showToast('Profile hub link copied!', 'success');
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleTriggerDragon = () => {
+    setIsDragonActive(true);
+    // Instant user-gesture audio trigger to ensure playback on all browsers
+    try {
+      const audio = new Audio('/dragon_roar.wav');
+      audio.volume = 0.85;
+      audio.play().catch(() => {});
+    } catch {
+      // Handled by DiscordDragonOverlay's audio engine
+    }
+    showToast('Crimson Dragon Wings Unleashed! 🐉🔥', 'success');
   };
 
   const handleVisitPlatform = (platform: SocialPlatform) => {
@@ -190,8 +203,8 @@ export default function App() {
           onCopyProfileLink={handleCopyProfileLink}
           isCopied={copiedLink}
           onToggleMusic={() => setIsMusicOpen((prev) => !prev)}
-          onOpenDragonEffect={() => setIsDragonActive(true)}
           isDragonActive={isDragonActive}
+          onTriggerDragonEffect={handleTriggerDragon}
         />
 
         {/* Quick-Access Flagship Channels (Instagram, YouTube, TikTok, Threads, Discord) */}
@@ -439,12 +452,6 @@ export default function App() {
         profileName={profile.name}
       />
 
-      {/* Discord Nitro Crimson Dragon Profile Effect Overlay (Plays for 5 seconds on load, then vanishes) */}
-      <DiscordDragonOverlay
-        isActive={isDragonActive}
-        onComplete={() => setIsDragonActive(false)}
-      />
-
       {/* Aesthetic Kashish Music Pop-up (Ashish Bhatia & Omkar Singh) */}
       <MusicPlayerPopup
         isOpen={isMusicOpen}
@@ -454,6 +461,12 @@ export default function App() {
 
       {/* Interactive Toast Notifications */}
       <Toast message={toastMessage} type={toastType} />
+
+      {/* Cinematic Discord Nitro Dragon Overlay Effect */}
+      <DiscordDragonOverlay
+        isActive={isDragonActive}
+        onComplete={() => setIsDragonActive(false)}
+      />
     </div>
   );
 }

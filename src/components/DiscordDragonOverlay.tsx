@@ -13,9 +13,29 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Play subtle cinematic dragon whoosh using Web Audio API
+  // Play subtle cinematic dragon whoosh and roar using HTML5 Audio & Web Audio API
   const playDragonSound = () => {
+    // 1. Play high-fidelity dragon roar & whoosh audio effect
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio('/dragon_roar.wav');
+        audioRef.current.volume = 0.85;
+      } else {
+        audioRef.current.currentTime = 0;
+      }
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay restriction fallback
+        });
+      }
+    } catch {
+      // Fallback to Web Audio synthesis
+    }
+
+    // 2. Layered cinematic Web Audio rumble and whoosh synthesis
     try {
       const AudioContextClass =
         window.AudioContext ||
@@ -38,31 +58,31 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(55, now);
-      osc.frequency.exponentialRampToValueAtTime(120, now + 0.4);
-      osc.frequency.exponentialRampToValueAtTime(45, now + 1.6);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.35);
+      osc.frequency.exponentialRampToValueAtTime(42, now + 1.8);
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(140, now);
-      filter.frequency.exponentialRampToValueAtTime(650, now + 0.4);
-      filter.frequency.exponentialRampToValueAtTime(90, now + 1.6);
+      filter.frequency.setValueAtTime(160, now);
+      filter.frequency.exponentialRampToValueAtTime(750, now + 0.4);
+      filter.frequency.exponentialRampToValueAtTime(80, now + 1.8);
 
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.10, now + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+      gain.gain.setValueAtTime(0.02, now);
+      gain.gain.linearRampToValueAtTime(0.16, now + 0.25);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 1.8);
+      osc.stop(now + 2.0);
 
-      // 2. Fiery noise whoosh
-      const bufferSize = ctx.sampleRate * 1.5;
+      // 2. Fiery resonant noise whoosh
+      const bufferSize = ctx.sampleRate * 2.0;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.45));
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.6));
       }
 
       const noiseSource = ctx.createBufferSource();
@@ -70,21 +90,24 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
       const noiseFilter = ctx.createBiquadFilter();
       noiseFilter.type = 'bandpass';
-      noiseFilter.frequency.setValueAtTime(500, now);
-      noiseFilter.Q.setValueAtTime(2.2, now);
+      noiseFilter.frequency.setValueAtTime(450, now);
+      noiseFilter.frequency.exponentialRampToValueAtTime(1100, now + 0.3);
+      noiseFilter.frequency.exponentialRampToValueAtTime(300, now + 1.8);
+      noiseFilter.Q.setValueAtTime(1.8, now);
 
       const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.07, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      noiseGain.gain.setValueAtTime(0.03, now);
+      noiseGain.gain.linearRampToValueAtTime(0.15, now + 0.2);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
 
       noiseSource.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
       noiseGain.connect(ctx.destination);
 
       noiseSource.start(now);
-      noiseSource.stop(now + 1.5);
+      noiseSource.stop(now + 1.8);
     } catch {
-      // Audio playback fails gracefully if browser restricts autoplay
+      // Audio playback fails gracefully if browser restricts
     }
   };
 
@@ -94,10 +117,8 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
 
     setIsFadingOut(false);
 
-    // Audio cue
-    const soundTimeout = setTimeout(() => {
-      playDragonSound();
-    }, 200);
+    // Audio cue triggered immediately for responsive feedback
+    playDragonSound();
 
     // Begin fadeout at 4.2 seconds
     const fadeoutTimeout = setTimeout(() => {
@@ -110,7 +131,6 @@ export const DiscordDragonOverlay: React.FC<DiscordDragonOverlayProps> = ({
     }, 5000);
 
     return () => {
-      clearTimeout(soundTimeout);
       clearTimeout(fadeoutTimeout);
       clearTimeout(completeTimeout);
     };

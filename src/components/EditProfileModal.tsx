@@ -167,38 +167,58 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">Avatar Image</label>
-                <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+                <label className="block text-xs font-medium text-neutral-300 mb-1">Avatar Profile Picture</label>
+                <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, avatarUrl: '/avatar.png?v=virat18_celebration' })}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
-                      formData.avatarUrl.includes('avatar')
-                        ? 'border-white bg-white/20 text-white shadow-sm'
+                      formData.avatarUrl.includes('virat') || formData.avatarUrl === '/avatar.png' || formData.avatarUrl.includes('celebration')
+                        ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300 shadow-sm ring-1 ring-emerald-500/50'
                         : 'border-white/10 bg-white/5 text-neutral-400 hover:text-white'
                     }`}
                   >
-                    <img src="/avatar.png?v=virat18_celebration" alt="Profile" className="w-5 h-5 rounded-full object-cover" />
-                    <span>Cricket Photo (Virat 18)</span>
+                    <img src="/avatar.png?v=virat18_celebration" alt="Virat Kohli" className="w-5 h-5 rounded-full object-cover" />
+                    <span>Virat Kohli #18 (Active PFP)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, avatarUrl: '/logo.png' })}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                       formData.avatarUrl === '/logo.png'
-                        ? 'border-white bg-white/20 text-white shadow-sm'
+                        ? 'border-white bg-white/20 text-white shadow-sm ring-1 ring-white/50'
                         : 'border-white/10 bg-white/5 text-neutral-400 hover:text-white'
                     }`}
                   >
                     <img src="/logo.png" alt="Logo" className="w-5 h-5 rounded-full object-cover" />
                     <span>Website Logo</span>
                   </button>
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 text-xs font-medium transition-all cursor-pointer">
+                    <span>Upload Custom Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            if (event.target?.result) {
+                              setFormData({ ...formData, avatarUrl: event.target.result as string });
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
                 <input
                   type="text"
                   value={formData.avatarUrl}
                   onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                  placeholder="/avatar.jpg, /logo.png, or URL"
+                  placeholder="/avatar.png, or paste image URL or upload above"
                   className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-sm text-white focus:outline-none focus:border-white/40"
                 />
               </div>
