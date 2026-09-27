@@ -9,7 +9,7 @@ import { ShareModal } from './components/ShareModal';
 import { MusicPlayerPopup } from './components/MusicPlayerPopup';
 import { Toast } from './components/Toast';
 import { VisitorBadge } from './components/VisitorBadge';
-import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon } from './components/SocialIcons';
+import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon, XTwitterIcon } from './components/SocialIcons';
 import { Sparkles, ArrowUpRight, Compass } from 'lucide-react';
 
 export default function App() {
@@ -37,6 +37,14 @@ export default function App() {
         if (!parsed.some((p: SocialPlatform) => p.id === 'discord')) {
           const discordPlat = defaultPlatforms.find((p) => p.id === 'discord');
           if (discordPlat) parsed.push(discordPlat);
+        }
+        const xIndex = parsed.findIndex((p: SocialPlatform) => p.id === 'x' || p.id === 'twitter');
+        if (xIndex === -1) {
+          const xPlat = defaultPlatforms.find((p) => p.id === 'x');
+          if (xPlat) parsed.push(xPlat);
+        } else {
+          parsed[xIndex].handle = '@_iamarsalan_';
+          parsed[xIndex].url = 'https://x.com/_iamarsalan_';
         }
         return parsed;
       } catch {
@@ -157,7 +165,7 @@ export default function App() {
     : platforms.filter((p) => {
         if (filterCategory === 'video') return p.id === 'youtube' || p.id === 'tiktok';
         if (filterCategory === 'visual') return p.id === 'instagram';
-        if (filterCategory === 'community') return p.id === 'threads' || p.id === 'discord';
+        if (filterCategory === 'community') return p.id === 'threads' || p.id === 'discord' || p.id === 'x' || p.id === 'twitter';
         return p.category === filterCategory;
       });
 
@@ -165,6 +173,7 @@ export default function App() {
   const flagshipInstagram = platforms.find((p) => p.id === 'instagram');
   const flagshipYouTube = platforms.find((p) => p.id === 'youtube');
   const flagshipTikTok = platforms.find((p) => p.id === 'tiktok');
+  const flagshipX = platforms.find((p) => p.id === 'x' || p.id === 'twitter');
   const flagshipThreads = platforms.find((p) => p.id === 'threads');
   const flagshipDiscord = platforms.find((p) => p.id === 'discord');
 
@@ -244,7 +253,7 @@ export default function App() {
             <span className="text-xs text-slate-400">Tap to visit directly</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
             {/* Instagram Quick Link */}
             {flagshipInstagram && (
               <a
@@ -329,6 +338,34 @@ export default function App() {
               </a>
             )}
 
+            {/* X (Twitter) Quick Link */}
+            {flagshipX && (
+              <a
+                id="quick-link-x"
+                href={flagshipX.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => handleVisitPlatform(flagshipX)}
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-white/10 active:scale-95 backdrop-blur-md"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <XTwitterIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-slate-300 transition-colors">
+                    X
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
+                    {flagshipX.handle}
+                  </span>
+                </div>
+                <div className="flex items-center gap-0.5 text-[11px] text-slate-300 font-semibold group-hover:underline">
+                  <span>Visit</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </div>
+              </a>
+            )}
+
             {/* Threads Quick Link */}
             {flagshipThreads && (
               <a
@@ -365,7 +402,7 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleVisitPlatform(flagshipDiscord)}
-                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-indigo-500/15 active:scale-95 col-span-2 sm:col-span-1 backdrop-blur-md"
+                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-indigo-500/15 active:scale-95 backdrop-blur-md"
               >
                 <div className="w-10 h-10 rounded-xl bg-indigo-950/70 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
                   <DiscordIcon className="w-5 h-5 text-[#7289da]" />
@@ -394,7 +431,7 @@ export default function App() {
               { id: 'all', label: 'All Channels', shortLabel: 'All' },
               { id: 'video', label: 'Video (YouTube & TikTok)', shortLabel: 'Video' },
               { id: 'visual', label: 'Visual (Instagram)', shortLabel: 'Visual' },
-              { id: 'community', label: 'Community (Discord & Threads)', shortLabel: 'Community' },
+              { id: 'community', label: 'Community (X, Discord, Threads)', shortLabel: 'Community' },
             ].map((cat) => {
               const isActive = filterCategory === cat.id;
               let activeColorClass = 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-1 ring-blue-400';

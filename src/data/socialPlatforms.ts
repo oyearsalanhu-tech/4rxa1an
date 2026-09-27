@@ -159,5 +159,33 @@ export const defaultPlatforms: SocialPlatform[] = [
       },
     ],
   },
+  {
+    id: 'x',
+    name: 'X (Twitter)',
+    handle: '@_iamarsalan_',
+    url: 'https://x.com/_iamarsalan_',
+    category: 'community',
+    description: 'Hot takes, video editing clips, creative threads, tech updates, and quick announcements.',
+    followersCount: 'Followers',
+    badge: 'Official X',
+    themeColor: '#000000',
+    accentBg: 'rgba(255, 255, 255, 0.12)',
+    textColor: 'text-white',
+    isPrimary: true,
+    featuredMedia: [
+      {
+        title: 'Creative Journey & Real-Time Updates',
+        views: 'Follow on X',
+        imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=500&auto=format&fit=crop',
+        tag: 'Post',
+      },
+      {
+        title: 'Behind The Scenes & Edit Breakdowns',
+        views: 'Latest Tweets',
+        imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=500&auto=format&fit=crop',
+        tag: 'Thread',
+      },
+    ],
+  },
 ];
 

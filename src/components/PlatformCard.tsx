@@ -39,7 +39,8 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({ platform, theme = 'b
       case 'discord':
         return <DiscordIcon className="w-6 h-6 text-[#7289da]" />;
       case 'x':
-        return <XTwitterIcon className="w-6 h-6 text-sky-400" />;
+      case 'twitter':
+        return <XTwitterIcon className="w-6 h-6 text-white" />;
       case 'spotify':
         return <SpotifyIcon className="w-6 h-6 text-emerald-400" />;
       case 'linkedin':
