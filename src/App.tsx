@@ -9,7 +9,7 @@ import { ShareModal } from './components/ShareModal';
 import { MusicPlayerPopup } from './components/MusicPlayerPopup';
 import { Toast } from './components/Toast';
 import { VisitorBadge } from './components/VisitorBadge';
-import { InstagramIcon, YouTubeIcon, TikTokIcon, ThreadsIcon, DiscordIcon, XTwitterIcon } from './components/SocialIcons';
+import { InstagramIcon, YouTubeIcon, TikTokIcon, DiscordIcon, XTwitterIcon } from './components/SocialIcons';
 import { Sparkles, ArrowUpRight, Compass } from 'lucide-react';
 
 export default function App() {
@@ -33,10 +33,16 @@ export default function App() {
     const saved = localStorage.getItem('arsalan_hub_platforms_v5');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
+        parsed = parsed.filter((p: SocialPlatform) => p.id !== 'threads');
         if (!parsed.some((p: SocialPlatform) => p.id === 'discord')) {
           const discordPlat = defaultPlatforms.find((p) => p.id === 'discord');
           if (discordPlat) parsed.push(discordPlat);
+        }
+        const instaIndex = parsed.findIndex((p: SocialPlatform) => p.id === 'instagram');
+        if (instaIndex !== -1) {
+          parsed[instaIndex].handle = '@arsalan_.ahmad_18';
+          parsed[instaIndex].url = 'https://www.instagram.com/arsalan_.ahmad_18';
         }
         const xIndex = parsed.findIndex((p: SocialPlatform) => p.id === 'x' || p.id === 'twitter');
         if (xIndex === -1) {
@@ -165,7 +171,7 @@ export default function App() {
     : platforms.filter((p) => {
         if (filterCategory === 'video') return p.id === 'youtube' || p.id === 'tiktok';
         if (filterCategory === 'visual') return p.id === 'instagram';
-        if (filterCategory === 'community') return p.id === 'threads' || p.id === 'discord' || p.id === 'x' || p.id === 'twitter';
+        if (filterCategory === 'community') return p.id === 'discord' || p.id === 'x' || p.id === 'twitter';
         return p.category === filterCategory;
       });
 
@@ -174,7 +180,6 @@ export default function App() {
   const flagshipYouTube = platforms.find((p) => p.id === 'youtube');
   const flagshipTikTok = platforms.find((p) => p.id === 'tiktok');
   const flagshipX = platforms.find((p) => p.id === 'x' || p.id === 'twitter');
-  const flagshipThreads = platforms.find((p) => p.id === 'threads');
   const flagshipDiscord = platforms.find((p) => p.id === 'discord');
 
   return (
@@ -253,7 +258,7 @@ export default function App() {
             <span className="text-xs text-slate-400">Tap to visit directly</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3">
             {/* Instagram Quick Link */}
             {flagshipInstagram && (
               <a
@@ -366,33 +371,6 @@ export default function App() {
               </a>
             )}
 
-            {/* Threads Quick Link */}
-            {flagshipThreads && (
-              <a
-                id="quick-link-threads"
-                href={flagshipThreads.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => handleVisitPlatform(flagshipThreads)}
-                className="group p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-600 transition-all text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-lg hover:shadow-white/5 active:scale-95 backdrop-blur-md"
-              >
-                <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center transition-transform group-hover:scale-110">
-                  <ThreadsIcon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="block text-xs sm:text-sm font-bold text-white group-hover:text-slate-300 transition-colors">
-                    Threads
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono hidden sm:block truncate max-w-[100px]">
-                    {flagshipThreads.handle}
-                  </span>
-                </div>
-                <div className="flex items-center gap-0.5 text-[11px] text-slate-300 font-semibold group-hover:underline">
-                  <span>Visit</span>
-                  <ArrowUpRight className="w-3 h-3" />
-                </div>
-              </a>
-            )}
 
             {/* Discord Server Quick Link */}
             {flagshipDiscord && (
@@ -431,7 +409,7 @@ export default function App() {
               { id: 'all', label: 'All Channels', shortLabel: 'All' },
               { id: 'video', label: 'Video (YouTube & TikTok)', shortLabel: 'Video' },
               { id: 'visual', label: 'Visual (Instagram)', shortLabel: 'Visual' },
-              { id: 'community', label: 'Community (X, Discord, Threads)', shortLabel: 'Community' },
+              { id: 'community', label: 'Community (X & Discord)', shortLabel: 'Community' },
             ].map((cat) => {
               const isActive = filterCategory === cat.id;
               let activeColorClass = 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-1 ring-blue-400';
