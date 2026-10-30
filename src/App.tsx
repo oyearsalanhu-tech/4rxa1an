@@ -41,8 +41,8 @@ export default function App() {
         }
         const instaIndex = parsed.findIndex((p: SocialPlatform) => p.id === 'instagram');
         if (instaIndex !== -1) {
-          parsed[instaIndex].handle = '@arsalan_.ahmad_18';
-          parsed[instaIndex].url = 'https://www.instagram.com/arsalan_.ahmad_18';
+          parsed[instaIndex].handle = '@iamnotarsh._';
+          parsed[instaIndex].url = 'https://www.instagram.com/iamnotarsh._';
         }
         const xIndex = parsed.findIndex((p: SocialPlatform) => p.id === 'x' || p.id === 'twitter');
         if (xIndex === -1) {

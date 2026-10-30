@@ -403,11 +403,11 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
             {/* Reason Banner: Instagram link */}
             <a
               id="instagram-banner-reason-link"
-              href="https://www.instagram.com/arsalan_.ahmad_18/"
+              href="https://www.instagram.com/iamnotarsh._/"
               target="_blank"
               rel="noopener noreferrer"
               className="mb-3.5 flex items-center justify-between gap-2 p-2.5 px-3 rounded-2xl bg-neutral-800/80 border border-neutral-700/60 hover:border-pink-500/50 transition-all group shadow-xs"
-              title="Visit @arsalan_.ahmad_18 on Instagram"
+              title="Visit @iamnotarsh._ on Instagram"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-xs group-hover:scale-105 transition-transform">
@@ -419,11 +419,11 @@ export const MusicPlayerPopup: React.FC<MusicPlayerPopupProps> = ({
                       Instagram Featured Soundtrack
                     </span>
                     <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 font-semibold border border-pink-500/30">
-                      @arsalan_.ahmad_18
+                      @iamnotarsh._
                     </span>
                   </div>
                   <p className="text-[10px] text-neutral-400 truncate">
-                    Curated track from @arsalan_.ahmad_18's official Instagram profile
+                    Curated track from @iamnotarsh._'s official Instagram profile
                   </p>
                 </div>
               </div>

@@ -16,8 +16,8 @@ export const defaultPlatforms: SocialPlatform[] = [
   {
     id: 'instagram',
     name: 'Instagram',
-    handle: '@arsalan_.ahmad_18',
-    url: 'https://www.instagram.com/arsalan_.ahmad_18',
+    handle: '@iamnotarsh._',
+    url: 'https://www.instagram.com/iamnotarsh._',
     category: 'visual',
     description: 'Visual journals, aesthetic reels, behind-the-scenes editing, and daily stories.',
     followersCount: 'Community',
